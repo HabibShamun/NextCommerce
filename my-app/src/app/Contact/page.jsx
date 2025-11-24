@@ -67,7 +67,7 @@ export default function ContactPage() {
           </div>
           <div className="card bg-base-200 shadow-md p-6 text-center">
             <h3 className="font-bold text-xl mb-2">📞 Phone</h3>
-            <p>+880 1234-567890</p>
+            <p>+880 1798137469</p>
             <p>Mon–Fri, 9am–6pm</p>
           </div>
           <div className="card bg-base-200 shadow-md p-6 text-center">

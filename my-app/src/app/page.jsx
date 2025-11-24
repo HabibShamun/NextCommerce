@@ -22,8 +22,8 @@ export default function Home() {
         const res = await axios.get("/products");
         const shuffled = res.data.sort(() => 0.5 - Math.random());
 
-        setHeroProducts(shuffled.slice(0, 3));     // ✅ Hero
-        setFeaturedProducts(shuffled.slice(3, 6)); // ✅ Featured
+        setHeroProducts(shuffled.slice(0, 3));     
+        setFeaturedProducts(shuffled.slice(3, 6));
       } catch (err) {
         console.error("Error fetching products:", err);
       } finally {

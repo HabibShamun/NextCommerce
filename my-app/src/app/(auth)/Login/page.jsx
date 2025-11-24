@@ -1,11 +1,12 @@
 "use client"; 
 import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
-import React, { useState, useContext, use } from "react";
-
+import React, { useState, useContext } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { signInUser, signInGoogle } = use(AuthContext);
+  const { signInUser, signInGoogle } = useContext(AuthContext);
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +15,7 @@ export default function LoginPage() {
     try {
       const result = await signInUser(email, password);
       console.log("Logged in:", result.user);
+      router.push("/"); // ✅ navigate to home after login
     } catch (err) {
       console.error("Login error:", err);
     }
@@ -23,6 +25,7 @@ export default function LoginPage() {
     try {
       const result = await signInGoogle();
       console.log("Google login:", result.user);
+      router.push("/"); // ✅ navigate to home after Google login
     } catch (err) {
       console.error("Google login error:", err);
     }
@@ -93,7 +96,12 @@ export default function LoginPage() {
               </svg>
               <span className="ml-2">Login with Google</span>
             </button>
-            <p>Dont have a account?<Link className="text-green-400" href={'/Register'}>Register</Link></p>
+            <p>
+              Dont have an account?
+              <Link className="text-green-400" href={"/Register"}>
+                Register
+              </Link>
+            </p>
           </fieldset>
         </div>
       </div>
