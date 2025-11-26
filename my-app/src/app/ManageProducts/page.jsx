@@ -1,15 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import useAxios from "@/hooks/useAxios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function ManageProductsPage() {
   const axios = useAxios();
+  const { user, loading } = useContext(AuthContext); // ✅ auth state
+  const router = useRouter();
+
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(true);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/Login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -20,11 +32,13 @@ export default function ManageProductsPage() {
         console.error("Error fetching products:", err);
         toast.error("Failed to load products.");
       } finally {
-        setLoading(false);
+        setFetching(false);
       }
     };
-    fetchProducts();
-  }, [axios]);
+    if (user) {
+      fetchProducts();
+    }
+  }, [axios, user]);
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
@@ -38,7 +52,20 @@ export default function ManageProductsPage() {
     }
   };
 
+  // ✅ Block rendering until auth is resolved
   if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // router.replace will handle redirect
+  }
+
+  if (fetching) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <span className="loading loading-spinner loading-lg"></span>
@@ -85,7 +112,6 @@ export default function ManageProductsPage() {
           <p className="text-center col-span-3 py-6">No products found.</p>
         )}
       </div>
-
 
       <ToastContainer position="bottom-right" autoClose={3000} />
     </div>

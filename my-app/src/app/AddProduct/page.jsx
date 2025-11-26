@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useAxios from "@/hooks/useAxios";
+import { AuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AddProductPage() {
   const axios = useAxios();
+  const { user, loading } = useContext(AuthContext); // ✅ get auth state
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -14,7 +19,14 @@ export default function AddProductPage() {
     stock: "",
   });
   const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/Login");
+    }
+  }, [user, loading, router]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -25,11 +37,11 @@ export default function AddProductPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setStatus(null);
 
     try {
-      const res = await axios.post("/products", {
+      await axios.post("/products", {
         ...formData,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock, 10),
@@ -50,9 +62,22 @@ export default function AddProductPage() {
         text: err.response?.data?.message || "Failed to add product.",
       });
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
+  // ✅ Block rendering until auth is resolved
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // router.replace will handle redirect
+  }
 
   return (
     <div className="min-h-screen bg-base-100 py-12 px-6 md:px-12">
@@ -145,8 +170,16 @@ export default function AddProductPage() {
             ></textarea>
           </div>
 
-          <button type="submit" className="btn btn-info w-full" disabled={loading}>
-            {loading ? <span className="loading loading-spinner loading-sm"></span> : "Add Product"}
+          <button
+            type="submit"
+            className="btn btn-info w-full"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <span className="loading loading-spinner loading-sm"></span>
+            ) : (
+              "Add Product"
+            )}
           </button>
         </form>
 
